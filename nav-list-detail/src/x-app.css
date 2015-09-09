@@ -1,0 +1,106 @@
+/*
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+:host {
+  display: block;
+}
+
+.nav {
+  border-right: 1px solid #ccc;
+}
+
+.list-panel {
+  background-color: #f1f1f1;
+}
+
+.list-panel {
+  --paper-header-panel-standard-container: {
+    border-right: 1px solid #D6D6D6;
+  };
+}
+
+paper-toolbar {
+  background-color: #42A5F5;
+}
+
+.list {
+  padding: 0;
+  background: #f1f1f1;
+}
+
+.list paper-item {
+  
+  border-bottom: 1px solid #dedede;
+  background-color: #fafafa;
+  min-height: 60px;
+}
+
+.main-drawer-panel:not([narrow]) [list-toggle] {
+  display: none;
+}
+
+/*.content {*/
+/*  height: 3000px;*/
+/*}*/
+
+paper-spinner.yellow::shadow .circle {
+  border-color: #f4b400;
+  color: #f4b400;
+}
+
+.mainContent {
+    margin: 10px;
+}
+
+div.newsContent > img {
+    width:100px !important;
+  height: 100px !important;
+}
+
+
+/*-----*/
+
+paper-card {
+  margin: 5px 10px ;
+  width: auto;
+  min-width: 95%;
+}
+
+paper-card .twoLines{
+
+  /*font-size: 1em;*/
+  /*line-height: 2em;*/
+  /*height: 4em;*/
+  /*overflow: hidden;*/
+}
+
+paper-card.paper-card-header::shadow .header .title-text {
+  padding: 16px;
+  font-size: 20px;
+  font-weight: normal;
+  color: var(--paper-card-header-color, rgb(16, 16, 16));
+@apply(--paper-card-header-text);
+}
+
+paper-card.paper-card-header::shadow .card-content {
+  color: #626262;
+  position:relative;
+@apply(--paper-card-content);
+}
+
+paper-card.paper-card-header::shadow .card-action {
+  color: #707070;
+  position:relative;
+@apply(--paper-card-content);
+}
+
+img {
+  width: 99px;
+  height: 99px;
+}

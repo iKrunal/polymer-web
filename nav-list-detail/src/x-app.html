@@ -1,0 +1,364 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+
+<link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/polymer-scroll-threshold/polymer-scroll-threshold.html">
+<link rel="import" href="../../bower_components/cw-moment/cw-moment.html">
+<link rel="import" href="../../bower_components/sc-timeago/sc-timeago.html">
+<script type="text/javascript" src="jquery-1.11.3.js"></script>
+<!--<link rel="import" href="../../bower_components">-->
+
+<!--<link rel="import" href="../../../core-scroll-threshold/core-scroll-threshold.html">-->
+
+
+  <!--<link href="https://www.polymer-project.org/0.5/components/core-scroll-header-panel/core-scroll-header-panel.html" rel="import">-->
+  <!--<link href="https://www.polymer-project.org/0.5/components/core-scroll-threshold/core-scroll-threshold.html" rel="import">-->
+
+<!--
+
+Left Nav + List + Detail
+
+ -->
+
+
+
+
+<dom-module id="x-app">
+
+  <link rel="import" type="css" href="x-app.css">
+  <template >
+
+    <iron-ajax
+      id="ajax"
+      url="/getallfeeds.php"
+      handle-as="json"
+      on-response="newsResponse"
+      debounce-duration="30000">
+   </iron-ajax>
+
+    <iron-ajax
+            id="language"
+            url="/getLanguages.php"
+            handle-as="json"
+            on-response="languageResponse"
+            debounce-duration="30000">
+    </iron-ajax>
+
+    <paper-drawer-panel id="navDrawerPanel" responsive-width="1280px">
+
+
+
+      <div class="nav" drawer>
+        <!-- Nav Content -->
+
+      </div>
+
+      <polymer-scroll-threshold id="threshold" lower-threshold="1" on-lower-trigger="loadMore" lower-triggered="{{lowerTriggered}}" fit></polymer-scroll-threshold>
+
+
+      <paper-drawer-panel id="mainDrawerPanel" class="main-drawer-panel" main responsive-width="600px"
+          drawer-width="[[_computeListWidth(_isMobile)]]" drawer-toggle-attribute="list-toggle"
+          narrow="{{_isMobile}}" disable-swipe=true>
+
+        <paper-header-panel id="paperHeaderPanel" class="list-panel" drawer flex>
+
+          <!-- List Toolbar -->
+          <paper-toolbar>
+            <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+            <span class="layout flex">NewsIt</span>      
+            <paper-spinner class="yellow" active></paper-spinner>
+            <paper-icon-button icon="refresh" on-tap="_beginCall"></paper-icon-button>
+            <!--<paper-icon-button icon="more-vert"></paper-icon-button>-->
+
+
+            <paper-menu-button>
+              <paper-icon-button icon="more-vert" class="dropdown-trigger" vertical-offset="100px"></paper-icon-button>
+              <paper-menu class="dropdown-content">
+                <template is="dom-repeat" items="{{languagesArray}}">
+                  <paper-item on-click="_languageTap" id="{{index2id(item.index)}}">{{item.displayName}}</paper-item>
+                </template>
+              </paper-menu>
+            </paper-menu-button>
+
+            <!--<paper-spinner class="blue" active></paper-spinner>            -->
+          </paper-toolbar>
+
+            <!-- List -->
+            <paper-menu id="scroller" class="list"  fill>
+                <template is="dom-repeat" items="{{newsArray}}">
+                  <!--<paper-item on-click="_listTap" id="{{index2id(item.index)}}">{{item.title}}</paper-item>-->
+
+                  <!--<post-card>-->
+                    <!--<h3><a href="{{item.newsurl}}" target="_blank" class="entry_title">{{item.title}}</a></h3>-->
+                    <!--<p>{{item.summary}}</p>-->
+                    <!--&lt;!&ndash;<small><cw-moment class="entry_published" datetime="{{entry.publishedDate}}" fromNow></cw-moment></small>&ndash;&gt;-->
+                  <!--</post-card>-->
+                  <paper-card on-click="_listTap"  class="paper-card-header" heading="{{item.title}}">
+                    <div class="card-content">{{item.summary}}</div>
+
+                    <div class="card-actions">
+                      <small>{{item.source}}</small>
+                      <!--<sc-timeago datetime="{{item.datetime}}"></sc-timeago>-->
+
+                    </div>
+                  </paper-card>
+
+                </template>
+                <div hidden$="{{!lowerTriggered}}">Please wait...</div>
+            </paper-menu>
+        </paper-header-panel>
+
+        <paper-header-panel class="content-panel" main>
+         <!--<div> Main content... </div>-->
+
+          <!-- Main Toolbar -->
+          <paper-toolbar>
+
+            <paper-icon-button icon="arrow-back" list-toggle></paper-icon-button>
+          </paper-toolbar>
+
+          <!-- Main Content -->
+          <div id="newsContent" class="mainContent" onload='fnName()'>
+            
+          </div>
+          
+
+        </paper-header-panel>
+
+      </paper-drawer-panel>
+
+    </paper-drawer-panel>
+
+  </template>
+
+  <script>
+    Polymer({
+      
+      is: 'x-app',
+      _computeListWidth: function(isMobile) {
+        // when in mobile screen size, make the list be 100% width to cover the whole screen
+        return isMobile ? '100%' : '33%';
+      },
+    
+      ready: function(){
+        console.log("Ready...");
+        this.newsArray = [];
+        this.languagesArray = [];
+        this.selectedLanguage = "Marathi";
+        this.page = 0;
+        this.getNews(this.page*50,this.selectedLanguage);
+        this.getLanguages();
+        this.$.threshold.scrollTarget = this.$.paperHeaderPanel.$.mainContainer;
+
+      },
+
+      created: function(){
+        console.log("created...");
+
+      },
+    
+      getNews: function (skip,language) {
+        this.$.ajax.url = "http://52.68.73.239/newsit/getallfeeds.php?skip="+skip+"&limit=50&language="+language+"";
+        console.log("getNews url:"+this.$.ajax.url);
+        this.$.ajax.generateRequest();
+        var spinners = document.querySelectorAll('paper-spinner');
+        Array.prototype.forEach.call(spinners, function(spinner) {
+          spinner.active = true;
+          console.log(spinner);
+        });
+      },
+      newsResponse: function(request) {
+        // this.newsArray = request.detail.response;
+        this.json = request.detail.response;
+        for (var i = 0; i < this.json.length; i++) {
+		  		item = this.json[i];
+		  		var title = $('<textarea />').html(item.title).text();
+		  		title = $('<textarea />').html(title).text();
+
+                title = title.replace(/&amp;#039;/g,"'");
+                title = title.replace(/&#039;/g,"'");
+                title = title.replace(/&amp;#8211;/g,";");
+                title = title.replace(/&#8211;/g,";");
+                title = decodeURIComponent(title);
+
+                item.title = title;
+
+
+
+                var summary = $('<textarea />').html(item.summary).text();
+                summary = $('<textarea />').html(summary).text();
+                summary = summary.replace(/&amp;#039;/g,"'");
+                summary = summary.replace(/&#039;/g,"'");
+                summary = summary.replace(/&nbsp;/g," ");
+                summary = summary.replace(/&#034;/g,'"');
+
+                item.summary = decodeURIComponent(summary);
+                item.summary  = $('<div />').html(item.summary.replace(/&amp;/g,'&')).text();
+
+
+          if(this.page == 0){
+		  		  item.index = i;  
+		  		}
+		  		else{
+		  		  item.index = i + (this.page * 50);
+		  		}
+  				this.push('newsArray', item);
+        }
+        var spinners = document.querySelectorAll('paper-spinner');
+        Array.prototype.forEach.call(spinners, function(spinner) {
+          spinner.active = false;
+        });
+        console.log(request.detail.response);
+      },
+
+      getLanguages: function () {
+        this.$.language.url = "http://52.68.73.239/newsit/getLanguages.php";
+        console.log("getLanguages url:"+this.$.ajax.url);
+        this.$.language.generateRequest();
+
+      },
+      languageResponse: function(request) {
+        // this.newsArray = request.detail.response;
+        this.languagesArray.length = 0;
+        this.json = request.detail.response;
+        for (var i = 0; i < this.json.length; i++) {
+          var language = this.json[i];
+          this.push('languagesArray', language);
+        }
+
+        console.log(request.detail.response);
+      },
+
+
+      _beginCall: function(e){
+        console.log('beginCall...');
+        this.newsArray = [];
+        this.newsArray.length = 0;
+        //this.$.threshold.clearLower();
+        //this.$.threshold.scrollTarget = this.$.paperHeaderPanel.$.mainContainer;
+
+        page = 0;
+        this.page = 0;
+        
+        console.log("begin:"+this.page);
+        var skip = this.page * 50;
+        this.getNews(skip,this.selectedLanguage);
+        document.getElementById("newsContent").innerHTML = "";  
+      },
+     
+      _listTap: function(e) {
+        // console.log(e.target.id); // selected iron-list row index
+        //console.log('On-tap list item: ', this.id2index(e.target.getAttribute('id')));
+        //console.log('Data:', this.newsArray[this.id2index(e.target.getAttribute('id'))]);
+
+        //var data = this.newsArray[this.id2index(e.target.getAttribute('id'))];
+        var data = e.target.getAttribute('data-item');
+        var data = e.model.item;
+
+
+        console.log(data);
+        if(data){
+          var description = $('<div />').html(data.description.replace(/&amp;/g,'&')).text();
+          document.getElementById("newsContent").innerHTML = description;
+
+        }
+        //FitImagesToScreen();
+        this.$.mainDrawerPanel.closeDrawer();
+        // console.log("click");
+      },
+
+      _languageTap: function(e) {
+
+        var data = e.target.getAttribute('data-item');
+        var data = e.model.item;
+
+        this.selectedLanguage = data.name;
+        console.log('_languageTap...'+ this.selectedLanguage);
+        this.newsArray = [];
+        this.newsArray.length = 0;
+
+        page = 0;
+        this.page = 0;
+
+        console.log("begin:"+this.page);
+        var skip = this.page * 50;
+        this.getNews(skip,this.selectedLanguage);
+        document.getElementById("newsContent").innerHTML = "";
+      },
+      
+      loadMore: function(){
+          console.log("loadMore...");
+          this.$.threshold.clearLower();
+
+        if(this.newsArray.length > 0){
+          console.log("Load");
+          this.page = this.page + 1;
+          this.getNews(this.page*50,this.selectedLanguage);
+          
+        }
+      },
+
+      index2id: function(index) {
+        return "_" + index;
+      },
+
+      id2index: function(id) {
+        return Number(id.substr(1));
+      },
+
+
+    });
+    
+function decode(str) {
+  var d = document.createElement("div");
+  d.innerHTML = str; 
+  return typeof d.innerText !== 'undefined' ? d.innerText : d.textContent;
+}
+
+function htmlDecode(input){
+  var e = document.createElement('div');
+  e.innerHTML = input;
+  // return e.childNodes[0].nodeValue;
+  return e.childNodes;
+}
+
+function fnName(){
+  console.log("loaded..."+i);
+  
+}
+
+
+function FitImagesToScreen() {
+  console.log("123");
+  var images = document.getElementsByTagName('img');
+  if(images.length > 0) {
+    for (var i = 0; i < images.length; i++) {
+      if (images[i].width >= (window.innerWidth - 10)) {
+        images[i].style.width = "100px";
+        images[i].style.height = "100px";
+      }
+    }
+  }
+}
+
+</script>
+
+</dom-module>

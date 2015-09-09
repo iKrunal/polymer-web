@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://www.polymer-project.org/0.5/components/webcomponentsjs/webcomponents.js"></script>
+  <link href="https://www.polymer-project.org/0.5/components/core-scroll-header-panel/core-scroll-header-panel.html" rel="import">
+  <link href="https://www.polymer-project.org/0.5/components/core-scroll-threshold/core-scroll-threshold.html" rel="import">
+  <link href="https://www.polymer-project.org/0.5/components/core-toolbar/core-toolbar.html" rel="import">
+  <link href="https://www.polymer-project.org/0.5/components/paper-icon-button/paper-icon-button.html" rel="import">
+</head>
+
+<body>
+  <template id="app" is="auto-binding">
+    <core-scroll-threshold id="threshold" scrollTarget="{{$.scrollpanel.scroller}}" lowerThreshold="100" on-lower-trigger="{{loadMore}}"></core-scroll-threshold>
+    <core-scroll-header-panel id="scrollpanel"  condenses="true" keepCondensedHeader scrollAwayTopbar="false" fit>
+      <core-toolbar class="tall">
+        <paper-icon-button icon="arrow-back"></paper-icon-button>
+        <div flex></div>
+        <paper-icon-button icon="search"></paper-icon-button>
+        <paper-icon-button icon="more-vert"></paper-icon-button>
+        <div id="title" class="bottom indent title">{{category}}</div>
+      </core-toolbar>
+      <div id="test" style="height:1000px"></div>
+    </core-scroll-header-panel>
+  </template>
+  <script>
+    (function() {
+      var app = document.querySelector('#app');
+      app.addEventListener('template-bound', function() {
+        this.loadMore = function() {
+          /* get more items */
+          alert('Triggered');
+          /* async function is in place of a data load function with a callback */
+          this.async(function () {
+            /* call this in your callback to reset the trigger to the new point */
+            this.$.threshold.clearLower();
+          });
+        };
+      });
+    })();
+  </script>
+</body>
+
+</html>

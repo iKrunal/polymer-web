@@ -10,7 +10,7 @@
   "dependencies": {
     "cw-moment": "cletusw/cw-moment#master",
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.4",
-    "iron-flex-layout": "polymerelements/iron-flex-layout#^1.0.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#~1.0.3",
     "iron-icon": "polymerelements/iron-icon#^1.0.0",
     "iron-icons": "polymerelements/iron-icons#^1.0.0",
     "iron-selector": "polymerelements/iron-selector#^1.0.0",

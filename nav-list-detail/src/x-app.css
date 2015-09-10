@@ -58,10 +58,10 @@ paper-spinner.yellow::shadow .circle {
     margin: 10px;
 }
 
-div.newsContent > img {
-    width:100px !important;
-  height: 100px !important;
-}
+/*div.newsContent > img {*/
+    /*width:100px !important;*/
+  /*height: 100px !important;*/
+/*}*/
 
 
 /*-----*/
@@ -98,9 +98,4 @@ paper-card.paper-card-header::shadow .card-action {
   color: #707070;
   position:relative;
 @apply(--paper-card-content);
-}
-
-img {
-  width: 99px;
-  height: 99px;
 }

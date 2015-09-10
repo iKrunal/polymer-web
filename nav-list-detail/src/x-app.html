@@ -21,7 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/polymer-scroll-threshold/polymer-scroll-threshold.html">
-<link rel="import" href="../../bower_components/cw-moment/cw-moment.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/sc-timeago/sc-timeago.html">
 <script type="text/javascript" src="jquery-1.11.3.js"></script>
 <!--<link rel="import" href="../../bower_components">-->
@@ -113,12 +113,13 @@ Left Nav + List + Detail
                   <!--</post-card>-->
                   <paper-card on-click="_listTap"  class="paper-card-header" heading="{{item.title}}">
                     <div class="card-content">{{item.summary}}</div>
-
                     <div class="card-actions">
-                      <small>{{item.source}}</small>
-                      <!--<sc-timeago datetime="{{item.datetime}}"></sc-timeago>-->
-
+                      <div  class="layout horizontal flex">
+                        <div class="flex"><small>{{item.source}}</small></div>
+                        <div><small><sc-timeago datetime="{{item.jsdate}}"></sc-timeago></small></div>
+                      </div>
                     </div>
+
                   </paper-card>
 
                 </template>
@@ -189,38 +190,42 @@ Left Nav + List + Detail
         // this.newsArray = request.detail.response;
         this.json = request.detail.response;
         for (var i = 0; i < this.json.length; i++) {
-		  		item = this.json[i];
-		  		var title = $('<textarea />').html(item.title).text();
-		  		title = $('<textarea />').html(title).text();
+          item = this.json[i];
+          var title = $('<textarea />').html(item.title).text();
+          title = $('<textarea />').html(title).text();
 
-                title = title.replace(/&amp;#039;/g,"'");
-                title = title.replace(/&#039;/g,"'");
-                title = title.replace(/&amp;#8211;/g,";");
-                title = title.replace(/&#8211;/g,";");
-                title = decodeURIComponent(title);
+          title = title.replace(/&amp;#039;/g,"'");
+          title = title.replace(/&#039;/g,"'");
+          title = title.replace(/&amp;#8211;/g,";");
+          title = title.replace(/&#8211;/g,";");
+          title = decodeURIComponent(title);
 
-                item.title = title;
+          item.title = title;
 
 
 
-                var summary = $('<textarea />').html(item.summary).text();
-                summary = $('<textarea />').html(summary).text();
-                summary = summary.replace(/&amp;#039;/g,"'");
-                summary = summary.replace(/&#039;/g,"'");
-                summary = summary.replace(/&nbsp;/g," ");
-                summary = summary.replace(/&#034;/g,'"');
+          var summary = $('<textarea />').html(item.summary).text();
+          summary = $('<textarea />').html(summary).text();
+          summary = summary.replace(/&amp;#039;/g,"'");
+          summary = summary.replace(/&#039;/g,"'");
+          summary = summary.replace(/&nbsp;/g," ");
+          summary = summary.replace(/&#034;/g,'"');
 
-                item.summary = decodeURIComponent(summary);
-                item.summary  = $('<div />').html(item.summary.replace(/&amp;/g,'&')).text();
+          item.summary = decodeURIComponent(summary);
+          item.summary  = $('<div />').html(item.summary.replace(/&amp;/g,'&')).text();
 
+          var datetime = item.datetime*1000;
+          var jsdatetime = new Date(datetime);
+          jsdatetime = jsdatetime.toISOString();
+          item.jsdate = jsdatetime;
 
           if(this.page == 0){
-		  		  item.index = i;  
-		  		}
-		  		else{
-		  		  item.index = i + (this.page * 50);
-		  		}
-  				this.push('newsArray', item);
+            item.index = i;
+          }
+          else{
+            item.index = i + (this.page * 50);
+          }
+          this.push('newsArray', item);
         }
         var spinners = document.querySelectorAll('paper-spinner');
         Array.prototype.forEach.call(spinners, function(spinner) {
@@ -277,7 +282,10 @@ Left Nav + List + Detail
         console.log(data);
         if(data){
           var description = $('<div />').html(data.description.replace(/&amp;/g,'&')).text();
-          document.getElementById("newsContent").innerHTML = description;
+          var newsContentDiv =  document.getElementById("newsContent");
+          newsContentDiv.innerHTML = description;
+          newsContentDiv.scrollTop = 10;
+//          $("#newsContent").scrollTop();
 
         }
         //FitImagesToScreen();
